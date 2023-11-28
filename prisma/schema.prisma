@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id                Int       @id @default(autoincrement())
+  username          String    @unique
+  alias             String
+  email             String    @unique
+  password          String    // Asegúrate de manejar la seguridad de la contraseña de forma adecuada
+  role              UserRole    // Puedes usar un enum para definir roles específicos
+  gamesPlayed       Int       @default(0)
+  gamesWonAsKiller  Int       @default(0) 
+  //Agregar como complice y como cada rol.
+  gamesWonAsVictim  Int       @default(0)
+  messages          Message[] @relation("sender") 
+}
+enum UserRole {
+  DEFAULT
+  DOCTOR
+  ASESINO
+  FISCAL
+  DETECTIVE
+  MANIACO
+  PERIODISTA
+}
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  sender    User     @relation("sender", fields: [senderId], references: [id]) // Cambiado a "sender" en lugar de "Sender"
+  senderId  Int
+  role      String
+}
