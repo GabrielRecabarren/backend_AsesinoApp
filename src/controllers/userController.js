@@ -91,3 +91,29 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ error: "Error al eliminar usuario" });
   }
 };
+// Controlador para el inicio de sesión
+export const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Verificar las credenciales utilizando Prisma
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+        password: password,
+      },
+    });
+
+    if (user) {
+      // Usuario válido
+      res.json({ success: true, message: 'Inicio de sesión exitoso' });
+    } else {
+      // Usuario no encontrado o contraseña incorrecta
+      res.status(401).json({ success: false, message: 'Credenciales incorrectas' });
+    }
+  } catch (error) {
+    console.error('Error al intentar iniciar sesión:', error);
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  }
+};
+

@@ -1,21 +1,34 @@
-import { Router } from "express";
-import { getAllUsers, getUser, createUser, updateUser, deleteUser } from "../controllers/userController.js";
+import { Router } from 'express';
+import {
+  getAllUsers,
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser,
+  loginUser
+} from '../controllers/userController.js';
+
+import {
+  obtenerTodosLosMensajes,
+  crearMensaje,
+  eliminarMensajePorId,
+} from '../controllers/messageController.js';
 
 const router = Router();
 
-// Ruta para obtener todos los usuarios
+// Rutas para usuarios
 router.get('/users', getAllUsers);
-
-// Ruta para obtener 1 usuario por ID
 router.get('/users/:id', getUser);
-
-// Ruta para crear un nuevo usuario
 router.post('/createUser', createUser);
-
-// Ruta para actualizar un usuario existente por ID
 router.put('/users/:id', updateUser);
+router.delete('/deleteUser/:id', deleteUser);
 
-// Ruta para eliminar un usuario por ID
-router.delete('/users/:id', deleteUser);
+// Ruta para inicio de sesión
+router.post('/login', loginUser);
+
+// Rutas para mensajes
+router.get('/messages', obtenerTodosLosMensajes);
+router.post('/messages', crearMensaje);
+router.delete('/messages/:id', eliminarMensajePorId);
 
 export default router;

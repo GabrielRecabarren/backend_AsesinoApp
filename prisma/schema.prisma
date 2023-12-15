@@ -12,16 +12,22 @@ datasource db {
 model User {
   id                Int       @id @default(autoincrement())
   username          String    @unique
-  alias             String
+  alias             String    
   email             String    @unique
   password          String    // Asegúrate de manejar la seguridad de la contraseña de forma adecuada
-  role              UserRole    // Puedes usar un enum para definir roles específicos
+  role              UserRole  @default(DEFAULT)
   gamesPlayed       Int       @default(0)
   gamesWonAsKiller  Int       @default(0) 
-  //Agregar como complice y como cada rol.
+  gamesWonAsLawyer  Int       @default(0) 
+  gamesWonAsDoctor  Int       @default(0) 
+  gamesWonAsDetective  Int       @default(0) 
+  gamesWonAsJournalist  Int       @default(0) 
+  gamesWonAsManiac  Int       @default(0) 
   gamesWonAsVictim  Int       @default(0)
   messages          Message[] @relation("sender") 
+  games             Game[]    @relation("players")
 }
+
 enum UserRole {
   DEFAULT
   DOCTOR
@@ -31,11 +37,25 @@ enum UserRole {
   MANIACO
   PERIODISTA
 }
+
+model Game {
+  id         Int      @id @default(autoincrement())
+  state      String   // Puedes definir un enum para los estados del juego (en_curso, finalizada, etc.)
+  players    User[]   @relation("players") // Jugadores en esta partida
+  messages   Message[] @relation("game")    // Mensajes específicos de esta partida
+  // Agregamos nuevas propiedades específicas del juego
+  accusations Int     @default(0)             // Número de acusaciones permitidas por día
+  // Otras propiedades específicas del juego
+}
+
 model Message {
   id        Int      @id @default(autoincrement())
   content   String
   createdAt DateTime @default(now())
-  sender    User     @relation("sender", fields: [senderId], references: [id]) // Cambiado a "sender" en lugar de "Sender"
+  sender    User     @relation("sender", fields: [senderId], references: [id])
   senderId  Int
   role      String
+  game      Game     @relation("game", fields: [gameId], references: [id])
+  gameId    Int
+  isAccusation Boolean @default(false) 
 }
