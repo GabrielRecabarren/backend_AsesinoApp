@@ -8,7 +8,7 @@ import {
   loginUser
 } from '../controllers/userController.js';
 
-import { crearPartida } from '../controllers/gameController.js';
+import { crearPartida, updatePartida } from '../controllers/gameController.js';
 
 import {
   obtenerTodosLosMensajes,
@@ -30,6 +30,8 @@ router.post('/login', loginUser);
 
 // Ruta para Crear Partida
 router.post('/crearPartida', crearPartida)
+//Agregar jugadores
+router.post('/games/:gameId/players', updatePartida);
 
 // Rutas para mensajes
 router.get('/messages', obtenerTodosLosMensajes);
