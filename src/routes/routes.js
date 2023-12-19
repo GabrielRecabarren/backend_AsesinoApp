@@ -8,6 +8,8 @@ import {
   loginUser
 } from '../controllers/userController.js';
 
+import { crearPartida } from '../controllers/gameController.js';
+
 import {
   obtenerTodosLosMensajes,
   crearMensaje,
@@ -25,6 +27,9 @@ router.delete('/deleteUser/:id', deleteUser);
 
 // Ruta para inicio de sesión
 router.post('/login', loginUser);
+
+// Ruta para Crear Partida
+router.post('/crearPartida', crearPartida)
 
 // Rutas para mensajes
 router.get('/messages', obtenerTodosLosMensajes);

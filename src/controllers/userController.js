@@ -106,7 +106,7 @@ export const loginUser = async (req, res) => {
 
     if (user) {
       // Usuario válido
-      res.json({ success: true, message: 'Inicio de sesión exitoso' });
+      res.json({ success: true, message: 'Inicio de sesión exitoso', user });
     } else {
       // Usuario no encontrado o contraseña incorrecta
       res.status(401).json({ success: false, message: 'Credenciales incorrectas' });
