@@ -44,9 +44,8 @@ export const crearPartida = async (req, res) => {
   }
 };
 
-
-// Controlador de actualización de partidas
-export const updatePartida = async (req, res) => {
+// Controlador para agregar jugadores a una partida existente
+export const agregarJugadores = async (req, res) => {
   try {
     // Obtiene los datos del cuerpo de la solicitud
     const { gameId } = req.params;
@@ -100,3 +99,61 @@ export const updatePartida = async (req, res) => {
   }
 };
 
+//Acceder a los jugadores de un juego
+export const listarJugadores = await prisma.game.findUnique({
+  where: { id: gameId },
+  include: { players: true },
+});
+
+console.log(listarJugadores.players);
+
+
+// Controlador de listado de partidas
+export const listarPartidas = async (req, res) => {
+  try {
+    console.log("Listando todas las partidas...");
+
+    // Obtén todas las partidas de la base de datos
+    const partidas = await prisma.game.findMany();
+
+    // Devuelve las partidas obtenidas
+    return res.status(200).json(partidas);
+  } catch (error) {
+    console.error("Error al listar las partidas:", error.message);
+    return res.status(500).json({
+      error: "No se pudieron obtener las partidas.",
+    });
+  }
+};
+
+// Controlador para finalizar una partida
+export const finalizarPartida = async (req, res) => {
+  try {
+    // Obtiene los datos del cuerpo de la solicitud
+    const { gameId } = req.params;
+    console.log(gameId);
+
+    // Asegúrate de que el gameId sea un número válido
+    if (!gameId || isNaN(parseInt(gameId))) {
+      return res.status(400).json({ error: "gameId no válido." });
+    }
+
+    console.log(`Finalizando la partida ${gameId}`);
+
+    // Actualiza el estado de la partida a "Finalizada"
+    const partidaFinalizada = await prisma.game.update({
+      where: { id: parseInt(gameId) },
+      data: {
+        state: "Finalizada",
+      },
+    });
+
+    // Devuelve la partida finalizada
+    return res.status(200).json(partidaFinalizada);
+  } catch (error) {
+    console.error("Error al finalizar la partida:", error.message);
+    return res.status(500).json({
+      error: "No se pudo finalizar la partida.",
+    });
+  }
+};
