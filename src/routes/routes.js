@@ -13,6 +13,7 @@ import {
   crearPartida,
   finalizarPartida,
   listarPartidas,
+  listarPartidasPorId,
 } from "../controllers/gameController.js";
 
 import {
@@ -40,10 +41,13 @@ router.put("/finalizarPartida/:gameId", finalizarPartida)
 //Ruta para listar todas las partidas (admin)
 router.get("/games", listarPartidas);
 
-//*Ruta para listar todas las partidas de un usuario
+//Ruta para listar todas las partidas de un usuario
+router.get("/games/:userId", listarPartidasPorId);
+
+
 
 //Agregar jugadores
-router.put("/games/:gameId/players", agregarJugadores);
+router.put("/games/:gameId", agregarJugadores);
 
 // Rutas para mensajes
 router.get("/messages", obtenerTodosLosMensajes);

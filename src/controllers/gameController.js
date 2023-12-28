@@ -85,8 +85,15 @@ export const agregarJugadores = async (req, res) => {
       data: {
         players: {
           connect: nuevosUserIds.map((userId) => ({ id: userId })),
-        },
+        }
       },
+      include: {
+        players: {
+          select: {
+            username: true
+          }
+        }
+      }
     });
 
     // Devuelve la partida actualizada
@@ -100,13 +107,14 @@ export const agregarJugadores = async (req, res) => {
 };
 
 //Acceder a los jugadores de un juego
-export const listarJugadores = await prisma.game.findUnique({
-  where: { id: gameId },
-  include: { players: true },
-});
+export const listarJugadores = async (req, res) => {
+  await prisma.game.findUnique({
+    where: { id: gameId },
+    include: { players: true },
+  });
+};
 
 console.log(listarJugadores.players);
-
 
 // Controlador de listado de partidas
 export const listarPartidas = async (req, res) => {
@@ -157,3 +165,40 @@ export const finalizarPartida = async (req, res) => {
     });
   }
 };
+
+//Controlador para obtener las partidas asociadas a un id:
+export const listarPartidasPorId = async (req, res) => {
+  //Obtenemos el id del solicitante
+  const { userId } = req.params;
+
+  //Verificamos que exista
+  if (!userId) {
+    return res.status(500).json({ error: "Revisar ID Usuario" });
+  } else {
+  
+    try {
+    //Buscamos en  la base de datos
+    const partidasPorID = await prisma.game.findMany({
+      where: {
+        creatorId: parseInt(userId),
+        players:{
+          some: {
+            id: parseInt(userId)
+          }
+        }
+      },
+      include:{
+        players:true
+        }
+      
+      ,
+    });
+    //Devolvemos las partidas
+    return res.status(200).json(partidasPorID);
+  } catch (error) {
+    //Avisamos error
+    console.log(error);
+    return res.status(500).json({error: "No se pueden buscar las partidas."});
+  }
+};
+}

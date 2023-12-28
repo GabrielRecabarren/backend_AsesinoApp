@@ -1,6 +1,14 @@
-import pkg from '@prisma/client';
+import pkg from "@prisma/client";
 const { PrismaClient, UserRole } = pkg;
 const prisma = new PrismaClient();
+import jwt from 'jsonwebtoken';
+
+
+// Función para generar tokens
+const generarToken = (datosUsuario) => {
+  const token = jwt.sign(datosUsuario, process.env.SECRET_KEY);
+  return token;
+};
 
 //Metodos de usuarios
 //Crear Usuario
@@ -58,21 +66,21 @@ export const updateUser = async (req, res) => {
   const userId = parseInt(req.params.id, 10);
   const updatedUserData = req.body;
 
-    try {
-      const updatedUser = await prisma.user.update({
-        where: {
-          id: userId,
-        },
-        data: updatedUserData,
-      });
+  try {
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: updatedUserData,
+    });
 
-      console.error("Usuario Actualizado");
-      res.json(updatedUser);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Error al actualizar usuario' });
-    }
-  };
+    console.error("Usuario Actualizado");
+    res.json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al actualizar usuario" });
+  }
+};
 //Eliminar Usuario
 export const deleteUser = async (req, res) => {
   const userId = parseInt(req.params.id, 10);
@@ -91,6 +99,7 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ error: "Error al eliminar usuario" });
   }
 };
+
 // Controlador para el inicio de sesión
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -106,14 +115,21 @@ export const loginUser = async (req, res) => {
 
     if (user) {
       // Usuario válido
-      res.json({ success: true, message: 'Inicio de sesión exitoso', user });
+      const token = generarToken(user);
+
+      res.json({ success: true, message: "Inicio de sesión exitoso", user, token });
+
+      
     } else {
       // Usuario no encontrado o contraseña incorrecta
-      res.status(401).json({ success: false, message: 'Credenciales incorrectas' });
+      res
+        .status(401)
+        .json({ success: false, message: "Credenciales incorrectas" });
     }
   } catch (error) {
-    console.error('Error al intentar iniciar sesión:', error);
-    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    console.error("Error al intentar iniciar sesión:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error interno del servidor" });
   }
 };
-
