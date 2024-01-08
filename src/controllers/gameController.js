@@ -188,7 +188,13 @@ export const listarPartidasPorId = async (req, res) => {
         }
       },
       include:{
+        creator:{
+          select:{
+            username:true
+          }
+        },
         players:true
+        
         }
       
       ,

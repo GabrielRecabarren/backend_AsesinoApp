@@ -21,11 +21,12 @@ import {
   crearMensaje,
   eliminarMensajePorId,
 } from "../controllers/messageController.js";
+import { verificarToken } from "../middleware/authmiddleware.js";
 
 const router = Router();
 
 // Rutas para usuarios
-router.get("/users", getAllUsers);
+router.get("/users", verificarToken, getAllUsers);
 router.get("/users/:id", getUser);
 router.post("/createUser", createUser);
 router.put("/users/:id", updateUser);
@@ -35,7 +36,7 @@ router.delete("/deleteUser/:id", deleteUser);
 router.post("/login", loginUser);
 
 // Ruta para Crear Partida
-router.post("/crearPartida", crearPartida);
+router.post("/crearPartida", verificarToken, crearPartida);
 router.put("/finalizarPartida/:gameId", finalizarPartida)
 
 //Ruta para listar todas las partidas (admin)
