@@ -2,10 +2,11 @@ import pkg from "@prisma/client";
 const { PrismaClient, UserRole } = pkg;
 const prisma = new PrismaClient();
 import jwt from 'jsonwebtoken';
-
+import 'dotenv/config';
 
 // Función para generar tokens
 const generarToken = (datosUsuario) => {
+  console.log(process.env.SECRET_KEY);
   const token = jwt.sign(datosUsuario, process.env.SECRET_KEY);
   return token;
 };
