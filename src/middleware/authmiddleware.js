@@ -2,6 +2,16 @@ import jwt from 'jsonwebtoken';
 import "dotenv/config"
 
 export const verificarToken = (req, res, next) => {
+
+//Verificamos que venga el header
+  const authorizationHeader = req.header('Authorization');
+
+  if (!authorizationHeader) {
+    return res.status(401).json({ mensaje: 'Token no proporcionado' });
+  }
+
+
+  //Se separa la información para utilizar solo la data del token
   const token = req.header('Authorization').split(" ")[1]; 
   if (!token) {
     return res.status(401).json({ mensaje: 'Token no proporcionado' });

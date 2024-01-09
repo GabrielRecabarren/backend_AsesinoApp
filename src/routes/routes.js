@@ -27,10 +27,10 @@ const router = Router();
 
 // Rutas para usuarios
 router.get("/users", verificarToken, getAllUsers);
-router.get("/users/:id", getUser);
-router.post("/createUser", createUser);
-router.put("/users/:id", updateUser);
-router.delete("/deleteUser/:id", deleteUser);
+router.get("/users/:id",verificarToken, getUser);
+router.post("/createUser",verificarToken, createUser);
+router.put("/users/:id",verificarToken, updateUser);
+router.delete("/deleteUser/:id",verificarToken, deleteUser);
 
 // Ruta para inicio de sesión
 router.post("/login", loginUser);
