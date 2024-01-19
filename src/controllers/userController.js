@@ -6,7 +6,6 @@ import 'dotenv/config';
 
 // Función para generar tokens
 const generarToken = (datosUsuario) => {
-  console.log(process.env.SECRET_KEY);
   const token = jwt.sign(datosUsuario, process.env.SECRET_KEY);
   return token;
 };
@@ -22,6 +21,7 @@ export const createUser = async (req, res) => {
     });
 
     res.json(newUser);
+    console.log(newUser);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al crear usuario" });
@@ -114,7 +114,7 @@ export const loginUser = async (req, res) => {
       },
     });
 
-    if (user) {
+    if (user) {   
       // Usuario válido
       const token = generarToken(user);
 

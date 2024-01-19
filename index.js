@@ -12,6 +12,7 @@ const prisma = new PrismaClient();
 // Middleware para procesar solicitudes con formato JSON
 app.use(express.json());
 
+//Middleware para diferencias solicitudes entrantes
 app.use((req, res, next) => {
   console.log(`Solicitud recibida: ${req.method} ${req.url}`);
   next();
