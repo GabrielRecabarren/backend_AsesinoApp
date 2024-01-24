@@ -42,7 +42,7 @@ app.listen(port, () => {
 });
 
 async function main() {
-  
+  console.log("Prisma: funcionando.")
 }
 
 main()
