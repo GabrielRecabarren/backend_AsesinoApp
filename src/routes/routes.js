@@ -12,6 +12,7 @@ import {
   agregarJugadores,
   crearPartida,
   finalizarPartida,
+  listarJugadores,
   listarPartidas,
   listarPartidasPorId,
 } from "../controllers/gameController.js";
@@ -31,6 +32,7 @@ router.get("/users/:id",verificarToken, getUser);
 router.post("/createUser", createUser);
 router.put("/users/:id",verificarToken, updateUser);
 router.delete("/deleteUser/:id",verificarToken, deleteUser);
+router.get("/users/:id", verificarToken, listarJugadores)//Listar jugadores por id de juego
 
 // Ruta para inicio de sesión
 router.post("/login", loginUser);

@@ -108,8 +108,10 @@ export const agregarJugadores = async (req, res) => {
 
 //Acceder a los jugadores de un juego
 export const listarJugadores = async (req, res) => {
+  const { gameId } = req.params;
+
   await prisma.game.findUnique({
-    where: { id: gameId },
+    where: { id: parseInt(gameId) },
     include: { players: true },
   });
 };
