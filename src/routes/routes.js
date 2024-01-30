@@ -32,7 +32,8 @@ router.get("/users/:id",verificarToken, getUser);
 router.post("/createUser", createUser);
 router.put("/users/:id",verificarToken, updateUser);
 router.delete("/deleteUser/:id",verificarToken, deleteUser);
-router.get("/users/:id", verificarToken, listarJugadores)//Listar jugadores por id de juego
+
+router.get("/players/:gameId", verificarToken, listarJugadores)//Listar jugadores por id de juego
 
 // Ruta para inicio de sesión
 router.post("/login", loginUser);
@@ -45,7 +46,7 @@ router.put("/finalizarPartida/:gameId", finalizarPartida)
 router.get("/games", listarPartidas);
 
 //Ruta para listar todas las partidas de un usuario
-router.get("/games/:userId", listarPartidasPorId);
+router.get("/games/:userId", verificarToken, listarPartidasPorId);
 
 
 

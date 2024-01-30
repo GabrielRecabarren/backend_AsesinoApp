@@ -56,6 +56,11 @@ export const agregarJugadores = async (req, res) => {
       return res.status(400).json({ error: "gameId no válido." });
     }
 
+    // Asegúrate de que los userIds sean un array válido
+    if (!userIds || !Array.isArray(userIds) || userIds.some(userId => typeof userId !== 'number')) {
+      return res.status(400).json({ error: "userIds debe ser un array válido de números." });
+    }
+
     console.log(`Agregando jugadores a la partida ${gameId}: ${userIds}`);
 
     // Obtén la partida existente
@@ -68,32 +73,29 @@ export const agregarJugadores = async (req, res) => {
       return res.status(404).json({ error: "Partida no encontrada." });
     }
 
-    // Asegúrate de que los userIds sean un array válido
-    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
-      return res.status(400).json({ error: "userIds no válido." });
-    }
-
     // Filtra los userIds que ya están en la partida
     const nuevosUserIds = userIds.filter(
       (userId) =>
         !partidaExistente.players.some((player) => player.id === userId)
     );
 
-    // Conecta los nuevos jugadores a la partida
-    const partidaActualizada = await prisma.game.update({
-      where: { id: parseInt(gameId) },
-      data: {
-        players: {
-          connect: nuevosUserIds.map((userId) => ({ id: userId })),
-        }
-      },
-      include: {
-        players: {
-          select: {
-            username: true
-          }
-        }
-      }
+    // Conecta los nuevos jugadores a la partida dentro de una transacción
+    const partidaActualizada = await prisma.$transaction(async (prisma) => {
+      return prisma.game.update({
+        where: { id: parseInt(gameId) },
+        data: {
+          players: {
+            connect: nuevosUserIds.map((userId) => ({ id: userId })),
+          },
+        },
+        include: {
+          players: {
+            select: {
+              username: true,
+            },
+          },
+        },
+      });
     });
 
     // Devuelve la partida actualizada
@@ -106,17 +108,29 @@ export const agregarJugadores = async (req, res) => {
   }
 };
 
+
 //Acceder a los jugadores de un juego
 export const listarJugadores = async (req, res) => {
   const { gameId } = req.params;
 
-  await prisma.game.findUnique({
-    where: { id: parseInt(gameId) },
-    include: { players: true },
-  });
+  try {
+    const game = await prisma.game.findUnique({
+      where: { id: parseInt(gameId) },
+      include: { players: true },
+    });
+
+    if (!game) {
+      return res.status(404).json({ error: 'Juego no encontrado' });
+    }
+
+    res.json(game.players);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 };
 
-console.log(listarJugadores.players);
+
 
 // Controlador de listado de partidas
 export const listarPartidas = async (req, res) => {
@@ -170,43 +184,37 @@ export const finalizarPartida = async (req, res) => {
 
 //Controlador para obtener las partidas asociadas a un id:
 export const listarPartidasPorId = async (req, res) => {
-  //Obtenemos el id del solicitante
+  console.log('Iniciando listarPartidasPorId');
   const { userId } = req.params;
+  console.log(userId);
 
-  //Verificamos que exista
   if (!userId) {
-    return res.status(500).json({ error: "Revisar ID Usuario" });
+    return res.status(500).json({ error: 'Revisar ID Usuario' });
   } else {
-  
     try {
-    //Buscamos en  la base de datos
-    const partidasPorID = await prisma.game.findMany({
-      where: {
-        creatorId: parseInt(userId),
-        players:{
-          some: {
-            id: parseInt(userId)
-          }
-        }
-      },
-      include:{
-        creator:{
-          select:{
-            username:true
-          }
+      const partidasPorID = await prisma.game.findMany({
+        where: {
+          creatorId: parseInt(userId),
+          players: {
+            some: {
+              id: parseInt(userId),
+            },
+          },
         },
-        players:true
-        
-        }
-      
-      ,
-    });
-    //Devolvemos las partidas
-    return res.status(200).json(partidasPorID);
-  } catch (error) {
-    //Avisamos error
-    console.log(error);
-    return res.status(500).json({error: "No se pueden buscar las partidas."});
+        include: {
+          creator: {
+            select: {
+              username: true,
+            },
+          },
+          players: true,
+        },
+      });
+      console.log('Finalizando listarPartidasPorId');
+      return res.status(200).json(partidasPorID);
+    } catch (error) {
+      console.log('Error en listarPartidasPorId:', error);
+      return res.status(500).json({ error: 'No se pueden buscar las partidas.' });
+    }
   }
 };
-}
