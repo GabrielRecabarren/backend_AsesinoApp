@@ -9,18 +9,11 @@ import router from './src/routes/routes.js';
 // Crear instancias
 const app = express();
 const httpServer = http.createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: 'http://192.168.1.87:3000',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  },
-});
-const prisma = new PrismaClient();
 
 // Configurar middleware y rutas
 app.use(express.json());
 app.use(cors({
-  origin: 'http://192.168.1.87:3000',
+  origin: '*',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204,
@@ -31,7 +24,22 @@ app.use((req, res, next) => {
 });
 app.use(router);
 
+
+const port = 3000;
+// Iniciar servidor HTTP
+httpServer.listen(port, () => {
+  console.log(`Servidor HTTP y Socket.io en puerto ${port}`);
+});
+
+// Iniciar servidor Socket.io en el mismo servidor HTTP
+const io = new Server(httpServer);
+
+
+
+const prisma = new PrismaClient();
+
 // Manejar eventos de Socket.io
+
 io.on('connect', (socket) => {
   console.log('Usuario conectado:', socket.id);
 
@@ -45,18 +53,6 @@ io.on('connect', (socket) => {
   });
 });
 
-// Configurar puertos
-const httpPort = 3000;
-const socketIoPort = 3001;
-
-// Iniciar servidor HTTP y Socket.io
-httpServer.listen(httpPort, () => {
-  console.log(`Servidor HTTP en puerto ${httpPort}`);
-});
-
-io.listen(socketIoPort, () => {
-  console.log(`Socket.io en puerto ${socketIoPort}`);
-});
 
 // Función principal
 async function main() {
