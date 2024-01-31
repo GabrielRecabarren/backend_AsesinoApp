@@ -50,6 +50,7 @@ export const agregarJugadores = async (req, res) => {
     // Obtiene los datos del cuerpo de la solicitud
     const { gameId } = req.params;
     const { userIds } = req.body;
+    console.log((parseInt(userIds)));
 
     // Asegúrate de que el gameId sea un número válido
     if (!gameId || isNaN(parseInt(gameId))) {
@@ -216,5 +217,27 @@ export const listarPartidasPorId = async (req, res) => {
       console.log('Error en listarPartidasPorId:', error);
       return res.status(500).json({ error: 'No se pueden buscar las partidas.' });
     }
+  }
+};
+
+// Controlador para cargar una partida por ID
+export const cargarPartidaPorId = async (req, res) => {
+  const { gameId } = req.params;
+
+  try {
+    // Busca la partida en la base de datos por su ID
+    const partida = await Game.findOne({ where: { id: parseInt(gameId) } });
+
+    if (!partida) {
+      return res.status(404).json({ message: "Partida no encontrada" });
+    }
+
+    // Realiza las acciones necesarias para cargar la partida
+
+    // Devuelve la partida cargada
+    return res.status(200).json(partida);
+  } catch (error) {
+    console.error("Error al cargar la partida:", error);
+    return res.status(500).json({ error: "Error al cargar la partida" });
   }
 };

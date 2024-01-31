@@ -15,6 +15,7 @@ import {
   listarJugadores,
   listarPartidas,
   listarPartidasPorId,
+  cargarPartidaPorId
 } from "../controllers/gameController.js";
 
 import {
@@ -52,6 +53,8 @@ router.get("/games/:userId", verificarToken, listarPartidasPorId);
 
 //Agregar jugadores
 router.put("/games/:gameId", agregarJugadores);
+// Ruta para cargar una partida por ID
+router.get("/games/:gameId/cargarPartida", verificarToken, cargarPartidaPorId);
 
 // Rutas para mensajes
 router.get("/messages", obtenerTodosLosMensajes);

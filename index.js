@@ -1,56 +1,75 @@
-import express from "express";
-import { PrismaClient } from "@prisma/client";
-import router from "./src/routes/routes.js";
-import cors from "cors";
+// Importar módulos necesarios
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import { PrismaClient } from '@prisma/client';
+import cors from 'cors';
+import router from './src/routes/routes.js';
 
-//Creamos la instancia de express
+// Crear instancias
 const app = express();
-const port = 3000;
-//Cliente de Prisma
+const httpServer = http.createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: 'http://192.168.1.87:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  },
+});
 const prisma = new PrismaClient();
 
-// Middleware para procesar solicitudes con formato JSON
+// Configurar middleware y rutas
 app.use(express.json());
-
-//Middleware para diferencias solicitudes entrantes
+app.use(cors({
+  origin: 'http://192.168.1.87:3000',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+}));
 app.use((req, res, next) => {
   console.log(`Solicitud recibida: ${req.method} ${req.url}`);
   next();
 });
-
-app.use(
-  cors({
-    origin: "http://192.168.1.87:3000",
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true,
-    optionsSuccessStatus: 204,
-  })
-);
-
-// Middleware para manejar errores
-app.use(async (err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Error interno del servidor" });
-});
-
-//Routes
 app.use(router);
 
-//Iniciar servidor
-app.listen(port, () => {
-  console.log(`Servidor en puerto ${port}`);
+// Manejar eventos de Socket.io
+io.on('connect', (socket) => {
+  console.log('Usuario conectado:', socket.id);
+
+  // Manejar el evento de chat message
+  socket.on('chat message', (msg) => {
+    // Transmitir el mensaje a todos los clientes
+    io.emit('chat message', msg);
+  });
+  socket.on('disconnect', () => {
+    console.log('Usuario desconectado:', socket.id);
+  });
 });
 
+// Configurar puertos
+const httpPort = 3000;
+const socketIoPort = 3001;
+
+// Iniciar servidor HTTP y Socket.io
+httpServer.listen(httpPort, () => {
+  console.log(`Servidor HTTP en puerto ${httpPort}`);
+});
+
+io.listen(socketIoPort, () => {
+  console.log(`Socket.io en puerto ${socketIoPort}`);
+});
+
+// Función principal
 async function main() {
-  console.log("Prisma: funcionando.")
+  try {
+    // Tu lógica principal aquí
+    console.log('Prisma: funcionando.');
+  } catch (error) {
+    console.error('Error en la ejecución principal:', error);
+  } finally {
+    // Desconectar Prisma al finalizar
+    await prisma.$disconnect();
+  }
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+// Ejecutar función principal
+main();
