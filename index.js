@@ -1,6 +1,6 @@
 // Importar módulos necesarios
 import express from 'express';
-import http from 'http';
+import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { PrismaClient } from '@prisma/client';
 import cors from 'cors';
@@ -8,7 +8,7 @@ import router from './src/routes/routes.js';
 
 // Crear instancias
 const app = express();
-const httpServer = http.createServer(app);
+const httpServer = createServer(app);
 
 // Configurar middleware y rutas
 app.use(express.json());
@@ -24,35 +24,43 @@ app.use((req, res, next) => {
 });
 app.use(router);
 
-
 const port = 3000;
 // Iniciar servidor HTTP
 httpServer.listen(port, () => {
   console.log(`Servidor HTTP y Socket.io en puerto ${port}`);
 });
-
 // Iniciar servidor Socket.io en el mismo servidor HTTP
-const io = new Server(httpServer);
-
-
-
-const prisma = new PrismaClient();
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
 // Manejar eventos de Socket.io
+io.on('connection', socket => {
+  console.log(`[${socket.id}] socket connected`);
+  io.emit('connection'); // Emite a todos los clientes
 
-io.on('connect', (socket) => {
+  console.log(socket.id);
   console.log('Usuario conectado:', socket.id);
 
   // Manejar el evento de chat message
-  socket.on('chat message', (msg) => {
+  socket.on('chat-message', (msg) => {
     // Transmitir el mensaje a todos los clientes
-    io.emit('chat message', msg);
+    io.emit('chat-message', msg);
   });
-  socket.on('disconnect', () => {
-    console.log('Usuario desconectado:', socket.id);
+  socket.on('disconnect', reason => {
+    console.log(`[${socket.id}] socket disconnected - ${reason}`);
   });
 });
 
+// Manejar eventos de Socket.io fuera del alcance del 'connection'
+setInterval(() => {
+  io.emit('time-msg', { time: new Date().toISOString() });
+}, 1000);
+
+const prisma = new PrismaClient();
 
 // Función principal
 async function main() {
