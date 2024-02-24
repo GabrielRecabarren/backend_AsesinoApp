@@ -18,9 +18,7 @@ export const verificarToken = (req, res, next) => {
   }
 
   try {
-    console.log(token);
     
-    console.log(process.env.SECRET_KEY)
     const decoded = jwt.verify(token, process.env.SECRET_KEY); 
     req.usuario = decoded.usuario; 
     next();

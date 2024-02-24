@@ -52,7 +52,7 @@ router.get("/games/:userId", verificarToken, listarPartidasPorId);
 
 
 //Agregar jugadores
-router.put("/games/agregarJugadores",verificarToken, agregarJugadores);
+router.put("/games/:gameId/agregarJugadores",verificarToken, agregarJugadores);
 // Ruta para cargar una partida por ID
 router.get("/games/:gameId/cargarPartida", verificarToken, cargarPartidaPorId);
 

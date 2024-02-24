@@ -50,15 +50,19 @@ export const agregarJugadores = async (req, res) => {
     // Obtiene los datos del cuerpo de la solicitud
     const { gameId } = req.params;
     const { userIds } = req.body;
-    console.log((parseInt(userIds)));
+    const parsedUserIds=userIds.map(id => parseInt(id, 10));
+    console.log(typeof(parsedUserIds));
 
     // Asegúrate de que el gameId sea un número válido
     if (!gameId || isNaN(parseInt(gameId))) {
+      console.log("no hay game id o no es valido");
       return res.status(400).json({ error: "gameId no válido." });
     }
 
     // Asegúrate de que los userIds sean un array válido
-    if (!userIds || !Array.isArray(userIds) || userIds.some(userId => typeof userId !== 'number')) {
+    if (!userIds ) {
+      console.log("no hay users id o no es valido");
+
       return res.status(400).json({ error: "userIds debe ser un array válido de números." });
     }
 
@@ -69,13 +73,15 @@ export const agregarJugadores = async (req, res) => {
       where: { id: parseInt(gameId) },
       include: { players: true },
     });
+    console.log(`Partida Existente: ${partidaExistente.id}`)
 
     if (!partidaExistente) {
+      console.log("Partida No encontrada")
       return res.status(404).json({ error: "Partida no encontrada." });
     }
 
     // Filtra los userIds que ya están en la partida
-    const nuevosUserIds = userIds.filter(
+    const nuevosUserIds = parsedUserIds.filter(
       (userId) =>
         !partidaExistente.players.some((player) => player.id === userId)
     );
@@ -100,6 +106,7 @@ export const agregarJugadores = async (req, res) => {
     });
 
     // Devuelve la partida actualizada
+    console.log(partidaActualizada);
     return res.status(200).json(partidaActualizada);
   } catch (error) {
     console.error("Error al agregar jugadores a la partida:", error.message);
