@@ -45,11 +45,13 @@ io.on('connection', socket => {
   console.log(socket.id);
   console.log('Usuario conectado:', socket.id);
 
-  // Manejar el evento de chat message
-  socket.on('chat-message', (msg) => {
-    // Transmitir el mensaje a todos los clientes
-    io.emit('chat-message', msg);
-  });
+  /// Manejar el evento de chat message
+socket.on('chat-message', (msg) => {
+  // Emitir el mensaje a todos los clientes, incluido el cliente que lo envió
+  io.emit('chat-message', msg);
+});
+
+
   socket.on('disconnect', reason => {
     console.log(`[${socket.id}] socket disconnected - ${reason}`);
   });

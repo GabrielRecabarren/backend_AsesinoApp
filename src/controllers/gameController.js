@@ -202,12 +202,10 @@ export const listarPartidasPorId = async (req, res) => {
     try {
       const partidasPorID = await prisma.game.findMany({
         where: {
-          creatorId: parseInt(userId),
-          players: {
-            some: {
-              id: parseInt(userId),
-            },
-          },
+          OR: [
+            { creatorId: parseInt(userId) }, // Filtrar por el ID del creador
+            { players: { some: { id: parseInt(userId) } } } // Filtrar por el ID del jugador
+          ]
         },
         include: {
           creator: {
@@ -226,6 +224,7 @@ export const listarPartidasPorId = async (req, res) => {
     }
   }
 };
+
 
 // Controlador para cargar una partida por ID
 export const cargarPartidaPorId = async (req, res) => {

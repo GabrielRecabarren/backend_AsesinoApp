@@ -59,5 +59,7 @@ model Message {
   gameId       Int
   role         String
   isAccusation Boolean  @default(false)
-  userId       Int
 }
+
+
+
