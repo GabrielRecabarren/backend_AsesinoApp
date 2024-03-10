@@ -46,10 +46,15 @@ io.on('connection', socket => {
   console.log('Usuario conectado:', socket.id);
 
   /// Manejar el evento de chat message
-socket.on('chat-message', (msg) => {
-  // Emitir el mensaje a todos los clientes, incluido el cliente que lo envió
-  io.emit('chat-message', msg);
-});
+  socket.on('chat-message', (msg, callback) => {
+    // Emitir el mensaje a todos los clientes, incluido el cliente que lo envió
+    console.log(msg,"*--msg");
+    io.emit('chat-message', msg);
+  
+    // Enviar una respuesta al callback del cliente
+    callback({ success: true, message: "Mensaje recibido correctamente" });
+  });
+  
 
 
   socket.on('disconnect', reason => {
