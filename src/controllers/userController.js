@@ -134,3 +134,24 @@ export const loginUser = async (req, res) => {
       .json({ success: false, message: "Error interno del servidor" });
   }
 };
+
+
+export const changeUserRole = async (req, res) => {
+  const { userId, newRole } = req.body;
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        role: newRole,
+      },
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error al cambiar el rol del usuario:', error);
+    res.status(500).json({ error: 'Error al cambiar el rol del usuario' });
+  }
+};

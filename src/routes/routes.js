@@ -6,6 +6,7 @@ import {
   updateUser,
   deleteUser,
   loginUser,
+  changeUserRole,
 } from "../controllers/userController.js";
 
 import {
@@ -49,7 +50,7 @@ router.get("/games", listarPartidas);
 //Ruta para listar todas las partidas de un usuario
 router.get("/games/:userId", verificarToken, listarPartidasPorId);
 
-
+router.post('/change-role', verificarToken, changeUserRole);//Cambiar rol
 
 //Agregar jugadores
 router.put("/games/:gameId/agregarJugadores",verificarToken, agregarJugadores);

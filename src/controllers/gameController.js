@@ -247,3 +247,32 @@ export const cargarPartidaPorId = async (req, res) => {
     return res.status(500).json({ error: "Error al cargar la partida" });
   }
 };
+
+
+//Asignar roles a usuarios, a partir del esquema
+export const assignRoles = async (gameId) => {
+  const users = await prisma.user.findMany({
+    where: {
+      players: {
+        some: {
+          gameId,
+        },
+      },
+    },
+  });
+
+  const possibleRoles = Object.values(UserRole);
+
+  const shuffledRoles = shuffle(possibleRoles);
+
+  for (let i = 0; i < users.length; i++) {
+    await prisma.user.update({
+      where: {
+        id: users[i].id,
+      },
+      data: {
+        role: shuffledRoles[i],
+      },
+    });
+  }
+};
