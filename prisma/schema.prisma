@@ -9,7 +9,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model User {
   id                   Int       @id @default(autoincrement())
   username             String    @unique
@@ -27,8 +26,19 @@ model User {
   gamesWonAsVictim     Int       @default(0)
   messages             Message[] @relation("sender")
   players              Game[]    @relation("players")
-  Game                 Game[]
+  createdGames         Game[]    @relation("creator") // Corrección aquí
 }
+
+model Game {
+  id        Int       @id @default(autoincrement())
+  state     String
+  messages  Message[] @relation("game")
+  players   User[]    @relation("players")
+  creator   User      @relation("creator",fields: [creatorId], references: [id])
+  creatorId Int
+  roles     UserRole[] // Nuevo campo para almacenar los roles de los usuarios en esta partida
+}
+
 
 enum UserRole {
   DEFAULT
@@ -40,14 +50,7 @@ enum UserRole {
   PERIODISTA
 }
 
-model Game {
-  id        Int       @id @default(autoincrement())
-  state     String
-  messages  Message[] @relation("game")
-  players   User[]    @relation("players")
-  creator   User      @relation(fields: [creatorId], references: [id])
-  creatorId Int
-}
+
 
 model Message {
   id           Int      @id @default(autoincrement())
