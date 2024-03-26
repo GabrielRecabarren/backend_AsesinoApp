@@ -32,12 +32,12 @@ export default function initializeSocket(httpServer) {
 
       }
       const joinedRoom = socket.join(selectedRoom);
-      console.log(`Unido con exito a la sala ${joinedRoom}`);
+      console.log(joinedRoom, "joinedRoom");
     });
 
     // Manejar el evento de chat message
     socket.on("chat-message", (msg, gameId, callback) => {
-      console.log(`Llega el mensaje : ${msg}`);
+      console.log(`Llega el mensaje`, msg);
       if (selectedRoom) {
         io.to(selectedRoom).emit("chat-message", msg, () => {
           console.log("Se emite el mensaje recibido desde el backend:", msg);
