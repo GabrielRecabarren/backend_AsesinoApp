@@ -1,5 +1,5 @@
 // Controlador de creación de partidas
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -249,30 +249,46 @@ export const cargarPartidaPorId = async (req, res) => {
 };
 
 
-//Asignar roles a usuarios, a partir del esquema
-export const assignRoles = async (gameId) => {
-  const users = await prisma.user.findMany({
-    where: {
-      players: {
-        some: {
-          gameId,
-        },
-      },
-    },
-  });
 
-  const possibleRoles = Object.values(UserRole);
 
-  const shuffledRoles = shuffle(possibleRoles);
+export const assignUserRoleInGame = async (req, res) => {
+  const { userId, gameId, userRoleId } = req.params;
 
-  for (let i = 0; i < users.length; i++) {
-    await prisma.user.update({
-      where: {
-        id: users[i].id,
-      },
+  try {
+    // Verificar si el usuario y la partida existen
+    console.log(userId, gameId, userRoleId, "datos assign roles");
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+    });
+
+    const game = await prisma.game.findUnique({
+      where: { id: parseInt(gameId) },
+    });
+
+    if (!user || !game) {
+      return res.status(404).json({ message: "Usuario o partida no encontrada" });
+    }
+
+    // Verificar si el userRoleId es un valor válido del enum UserRole
+    if (!Object.values(UserRole).includes(userRoleId)) {
+      return res.status(400).json({ message: "UserRole no válido" });
+    }
+    console.log("validaciones ok");
+
+    // Crear un nuevo registro UserRoleInGame
+    await prisma.userRoleInGame.create({
       data: {
-        role: shuffledRoles[i],
+        user: { connect: { id: parseInt(userId) } },
+        game: { connect: { id: parseInt(gameId) } },
+        role: userRoleId,
       },
     });
+
+    console.log(`UserRole ${userRoleId} asignado al Usuario ${userId} en la partida ${gameId} exitosamente.`);
+    
+    return res.status(200).json({ message: `UserRole ${userRoleId} asignado al Usuario ${userId} en la partida ${gameId} exitosamente.` });
+  } catch (error) {
+    console.error("Error al asignar UserRole:", error);
+    return res.status(500).json({ error: "Error al asignar UserRole" });
   }
 };

@@ -9,13 +9,13 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
   id                   Int       @id @default(autoincrement())
   username             String    @unique
   alias                String
   email                String    @unique
   password             String
-  role                 UserRole  @default(DEFAULT)
   gamesPlayed          Int       @default(0)
   gamesWonAsKiller     Int       @default(0)
   gamesWonAsLawyer     Int       @default(0)
@@ -26,7 +26,8 @@ model User {
   gamesWonAsVictim     Int       @default(0)
   messages             Message[] @relation("sender")
   players              Game[]    @relation("players")
-  createdGames         Game[]    @relation("creator") // Corrección aquí
+  createdGames         Game[]    @relation("creator")
+  roles                UserRoleInGame[]  // Relación con los roles del usuario en las partidas
 }
 
 model Game {
@@ -36,9 +37,17 @@ model Game {
   players   User[]    @relation("players")
   creator   User      @relation("creator",fields: [creatorId], references: [id])
   creatorId Int
-  roles     UserRole[] // Nuevo campo para almacenar los roles de los usuarios en esta partida
+  roles     UserRoleInGame[] // Relación con los roles de los usuarios en esta partida
 }
 
+model UserRoleInGame {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  game      Game     @relation(fields: [gameId], references: [id])
+  gameId    Int
+  role      UserRole
+}
 
 enum UserRole {
   DEFAULT
@@ -49,8 +58,6 @@ enum UserRole {
   MANIACO
   PERIODISTA
 }
-
-
 
 model Message {
   id           Int      @id @default(autoincrement())
@@ -63,6 +70,3 @@ model Message {
   role         String
   isAccusation Boolean  @default(false)
 }
-
-
-
