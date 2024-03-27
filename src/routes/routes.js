@@ -17,7 +17,8 @@ import {
   listarPartidas,
   listarPartidasPorId,
   cargarPartidaPorId,
-  assignUserRoleInGame
+  assignUserRoleInGame,
+  consultarRolUsuarioEnPartida
 } from "../controllers/gameController.js";
 
 import {
@@ -51,7 +52,9 @@ router.get("/games", listarPartidas);
 //Ruta para listar todas las partidas de un usuario
 router.get("/games/:userId", verificarToken, listarPartidasPorId);
 
+//Eleccion y consulta de rol
 router.put('/users/:userId/games/:gameId/assign-role/:userRoleId', verificarToken, assignUserRoleInGame);
+router.get('/users/:userId/games/:gameId/user-role', verificarToken, consultarRolUsuarioEnPartida);
 
 //Agregar jugadores
 router.put("/games/:gameId/agregarJugadores",verificarToken, agregarJugadores);

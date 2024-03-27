@@ -292,3 +292,28 @@ export const assignUserRoleInGame = async (req, res) => {
     return res.status(500).json({ error: "Error al asignar UserRole" });
   }
 };
+export const consultarRolUsuarioEnPartida = async (req, res) => {
+  const { userId, gameId } = req.params;
+console.log(userId,gameId,"hola");
+  try {
+    // Buscar la relación UserRoleInGame para el usuario y la partida específicos
+    const userRoleInGame = await prisma.userRoleInGame.findFirst({
+      where: {
+        userId: parseInt(userId),
+        gameId: parseInt(gameId),
+      },
+    });
+
+    if (!userRoleInGame) {
+      return res.status(404).json({ message: 'No se encontró el rol del usuario en la partida.' });
+    }
+
+    // Obtener el nombre del rol del usuario
+    const userRole = userRoleInGame.role;
+console.log(userRole, "consulta al rol");
+    return res.status(200).json({ userRole });
+  } catch (error) {
+    console.error('Error al consultar el rol del usuario en la partida:', error);
+    return res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
