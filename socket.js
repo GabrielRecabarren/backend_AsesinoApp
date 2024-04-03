@@ -54,6 +54,19 @@ export default function initializeSocket(httpServer) {
       }
     });
 
+    //Manejando evento de rol
+    socket.on("action-rol", (msg, destinatario, callback) => {
+      console.log("Acción Rol:  ", msg);
+      switch (msg) {
+        case "asesinar":
+          console.log("Un asesinato está sucediendo")
+          io.to(destinatario).emit("mensaje",msg,callback);
+          break;
+        default:
+          console.error("Accion desconocida");
+      }
+    });
+
     socket.on("disconnect", (reason) => {
       console.log(`[${socket.id}] socket disconnected - ${reason}`);
     });
