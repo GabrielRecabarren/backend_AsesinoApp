@@ -37,7 +37,7 @@ model Game {
   players   User[]    @relation("players")
   creator   User      @relation("creator",fields: [creatorId], references: [id])
   creatorId Int
-  roles     UserRoleInGame[] // Relación con los roles de los usuarios en esta partida
+  roles     UserRoleInGame[] 
 }
 
 model UserRoleInGame {
@@ -57,6 +57,8 @@ enum UserRole {
   DETECTIVE
   MANIACO
   PERIODISTA
+  COMPLICE
+
 }
 
 model Message {

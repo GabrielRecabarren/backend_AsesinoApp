@@ -50,8 +50,8 @@ export const agregarJugadores = async (req, res) => {
     // Obtiene los datos del cuerpo de la solicitud
     const { gameId } = req.params;
     const { userIds } = req.body;
-    const parsedUserIds=userIds.map(id => parseInt(id, 10));
-    console.log(typeof(parsedUserIds));
+    const parsedUserIds = userIds.map((id) => parseInt(id, 10));
+    console.log(typeof parsedUserIds);
 
     // Asegúrate de que el gameId sea un número válido
     if (!gameId || isNaN(parseInt(gameId))) {
@@ -60,10 +60,12 @@ export const agregarJugadores = async (req, res) => {
     }
 
     // Asegúrate de que los userIds sean un array válido
-    if (!userIds ) {
+    if (!userIds) {
       console.log("no hay users id o no es valido");
 
-      return res.status(400).json({ error: "userIds debe ser un array válido de números." });
+      return res
+        .status(400)
+        .json({ error: "userIds debe ser un array válido de números." });
     }
 
     console.log(`Agregando jugadores a la partida ${gameId}: ${userIds}`);
@@ -73,10 +75,10 @@ export const agregarJugadores = async (req, res) => {
       where: { id: parseInt(gameId) },
       include: { players: true },
     });
-    console.log(`Partida Existente: ${partidaExistente.id}`)
+    console.log(`Partida Existente: ${partidaExistente.id}`);
 
     if (!partidaExistente) {
-      console.log("Partida No encontrada")
+      console.log("Partida No encontrada");
       return res.status(404).json({ error: "Partida no encontrada." });
     }
 
@@ -116,7 +118,6 @@ export const agregarJugadores = async (req, res) => {
   }
 };
 
-
 //Acceder a los jugadores de un juego
 export const listarJugadores = async (req, res) => {
   const { gameId } = req.params;
@@ -128,17 +129,15 @@ export const listarJugadores = async (req, res) => {
     });
 
     if (!game) {
-      return res.status(404).json({ error: 'Juego no encontrado' });
+      return res.status(404).json({ error: "Juego no encontrado" });
     }
 
     res.json(game.players);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 };
-
-
 
 // Controlador de listado de partidas
 export const listarPartidas = async (req, res) => {
@@ -192,20 +191,18 @@ export const finalizarPartida = async (req, res) => {
 
 //Controlador para obtener las partidas asociadas a un id:
 export const listarPartidasPorId = async (req, res) => {
-  console.log('Iniciando listarPartidasPorId');
   const { userId } = req.params;
-  console.log(userId);
 
   if (!userId) {
-    return res.status(500).json({ error: 'Revisar ID Usuario' });
+    return res.status(500).json({ error: "Revisar ID Usuario" });
   } else {
     try {
       const partidasPorID = await prisma.game.findMany({
         where: {
           OR: [
             { creatorId: parseInt(userId) }, // Filtrar por el ID del creador
-            { players: { some: { id: parseInt(userId) } } } // Filtrar por el ID del jugador
-          ]
+            { players: { some: { id: parseInt(userId) } } }, // Filtrar por el ID del jugador
+          ],
         },
         include: {
           creator: {
@@ -216,15 +213,15 @@ export const listarPartidasPorId = async (req, res) => {
           players: true,
         },
       });
-      console.log('Finalizando listarPartidasPorId');
       return res.status(200).json(partidasPorID);
     } catch (error) {
-      console.log('Error en listarPartidasPorId:', error);
-      return res.status(500).json({ error: 'No se pueden buscar las partidas.' });
+      console.log("Error en listarPartidasPorId:", error);
+      return res
+        .status(500)
+        .json({ error: "No se pueden buscar las partidas." });
     }
   }
 };
-
 
 // Controlador para cargar una partida por ID
 export const cargarPartidaPorId = async (req, res) => {
@@ -248,15 +245,12 @@ export const cargarPartidaPorId = async (req, res) => {
   }
 };
 
-
-
-
 export const assignUserRoleInGame = async (req, res) => {
   const { userId, gameId, userRoleId } = req.params;
 
   try {
     // Verificar si el usuario y la partida existen
-    console.log(userId, gameId, userRoleId, "datos assign roles");
+    // console.log(userId, gameId, userRoleId, "datos assign roles");
     const user = await prisma.user.findUnique({
       where: { id: parseInt(userId) },
     });
@@ -266,7 +260,9 @@ export const assignUserRoleInGame = async (req, res) => {
     });
 
     if (!user || !game) {
-      return res.status(404).json({ message: "Usuario o partida no encontrada" });
+      return res
+        .status(404)
+        .json({ message: "Usuario o partida no encontrada" });
     }
 
     // Verificar si el userRoleId es un valor válido del enum UserRole
@@ -284,9 +280,15 @@ export const assignUserRoleInGame = async (req, res) => {
       },
     });
 
-    console.log(`UserRole ${userRoleId} asignado al Usuario ${userId} en la partida ${gameId} exitosamente.`);
-    
-    return res.status(200).json({ message: `UserRole ${userRoleId} asignado al Usuario ${userId} en la partida ${gameId} exitosamente.` });
+    console.log(
+      `UserRole ${userRoleId} asignado al Usuario ${userId} en la partida ${gameId} exitosamente.`
+    );
+
+    return res
+      .status(200)
+      .json({
+        message: `UserRole ${userRoleId} asignado al Usuario ${userId} en la partida ${gameId} exitosamente.`,
+      });
   } catch (error) {
     console.error("Error al asignar UserRole:", error);
     return res.status(500).json({ error: "Error al asignar UserRole" });
@@ -294,7 +296,6 @@ export const assignUserRoleInGame = async (req, res) => {
 };
 export const consultarRolUsuarioEnPartida = async (req, res) => {
   const { userId, gameId } = req.params;
-console.log(userId,gameId,"hola");
   try {
     // Buscar la relación UserRoleInGame para el usuario y la partida específicos
     const userRoleInGame = await prisma.userRoleInGame.findFirst({
@@ -305,15 +306,19 @@ console.log(userId,gameId,"hola");
     });
 
     if (!userRoleInGame) {
-      return res.status(404).json({ message: 'No se encontró el rol del usuario en la partida.' });
+      return res
+        .status(404)
+        .json({ message: "No se encontró el rol del usuario en la partida." });
     }
 
     // Obtener el nombre del rol del usuario
     const userRole = userRoleInGame.role;
-console.log(userRole, "consulta al rol");
     return res.status(200).json({ userRole });
   } catch (error) {
-    console.error('Error al consultar el rol del usuario en la partida:', error);
-    return res.status(500).json({ message: 'Error interno del servidor.' });
+    console.error(
+      "Error al consultar el rol del usuario en la partida:",
+      error
+    );
+    return res.status(500).json({ message: "Error interno del servidor." });
   }
 };
