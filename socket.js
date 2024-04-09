@@ -3,6 +3,9 @@
 import { Server } from "socket.io";
 
 const gameRooms = {};
+const canalesPersonales = {};
+const canalesPrivados ={};
+
 export default function initializeSocket(httpServer) {
   const io = new Server(httpServer, {
     cors: {
@@ -15,30 +18,27 @@ export default function initializeSocket(httpServer) {
   io.on("connection", (socket) => {
     console.log(`[${socket.id}] socket connected en puerto 3000`);
 
-    socket.on("canal-privado", (userId)=> {
-      socket.userId = userId;
-      socket.join(userId);
-      console.log(socket.userId, "userId como sala privada");
 
-    })
-
-    
-
-    // Emite un evento de conexión a todos los clientes
-    socket.emit("bienvenida", "¡Bienvenido a la aplicación de Socket.io!");
-    
-    console.log("Usuario conectado:", socket.id, socket.userId);
+    console.log("Usuario conectado:", socket.id);
 
     //MAnejar cuando el usuario se conecta a una sala
     let selectedRoom = undefined;
+    let canalPersonal = undefined
     //Cuando un usuario se una a una partida
-    socket.on("join-game", (gameId) => {
-      selectedRoom = gameRooms[gameId];
+    socket.on("join-game", (gameId, userId) => {
+      selectedRoom = gameRooms[`partida_${gameId}`];
       if (!selectedRoom) {
         selectedRoom = `partida_${gameId}`;
         gameRooms[gameId] = selectedRoom; // Guardar la sala de juego en gameRooms
       }
       socket.join(selectedRoom);
+      //Abrimos su canal personal
+      canalPersonal = canalesPersonales[`canal_${gameId}_${userId}`]
+      if (!canalPersonal) {
+        canalPersonal = `canal_${gameId}_${userId}`
+        socket.join(canalPersonal);
+        console.log(`unido con exito a canal ${canalPersonal} y sala ${selectedRoom}`);
+      }
     });
 
     // Manejar el evento de chat message
@@ -59,12 +59,13 @@ export default function initializeSocket(httpServer) {
     });
 
     //Manejando evento de rol
-    socket.on("action-rol", (msg, destinatario, callback) => {
-      console.log("Acción Rol:  ", msg, destinatario);
-      switch (msg) {
+    socket.on("action-rol", (accion, destinatario,gameId, callback) => {
+      const canalUsuarioElegido = `canal_${gameId}_${destinatario}`
+      console.log("Acción Rol:  ", accion, destinatario, gameId);
+      switch (accion) {
         case "asesinar":
           console.log("Un asesinato está sucediendo");
-          io.to(destinatario).emit("action-rol", msg);
+          io.to(canalUsuarioElegido).emit("action-rol", accion, destinatario, gameId);
           break;
         default:
           console.error("Accion desconocida");
