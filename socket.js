@@ -73,6 +73,12 @@ export default function initializeSocket(httpServer) {
       callback("Mensaje recibido correctamente en el servidor");
     });
 
+    socket.on("confirmar-muerte", (y_n, callback) => {
+      console.log(y_n);
+      io.emit("asesinato");
+      callback("Muerte confirmada");
+    })
+
     socket.on("disconnect", (reason) => {
       console.log(`[${socket.id}] socket disconnected - ${reason}`);
     });
