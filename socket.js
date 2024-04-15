@@ -59,13 +59,12 @@ export default function initializeSocket(httpServer) {
     });
 
     //Manejando evento de rol
-    socket.on("action-rol", (accion, destinatario,gameId, callback) => {
+    socket.on("action-rol", (accion, emisor, destinatario,gameId, callback) => {
+      //Canal usuarioElegido
       const canalUsuarioElegido = `canal_${gameId}_${destinatario}`
-      console.log("Acción Rol:  ", accion, destinatario, gameId);
       switch (accion) {
         case "asesinar":
-          console.log("Un asesinato está sucediendo");
-          io.to(canalUsuarioElegido).emit("action-rol", accion, destinatario, gameId);
+          io.to(canalUsuarioElegido).emit("action-rol", accion,emisor, destinatario, gameId);
           break;
         default:
           console.error("Accion desconocida");
@@ -73,11 +72,16 @@ export default function initializeSocket(httpServer) {
       callback("Mensaje recibido correctamente en el servidor");
     });
 
-    socket.on("confirmar-muerte", (y_n, callback) => {
-      console.log(y_n);
-      io.emit("asesinato");
-      callback("Muerte confirmada");
-    })
+    socket.on("confirmar-muerte", (y_n, destinatario, gameId, callback) => {
+      const canalUsuarioElegido = `canal_${gameId}_${destinatario}`
+      if(y_n === true){
+        console.log(canalUsuarioElegido, "canal")
+        io.to(canalUsuarioElegido).emit("asesinato");
+        callback("Muerte confirmada");
+      }
+    });
+
+    
 
     socket.on("disconnect", (reason) => {
       console.log(`[${socket.id}] socket disconnected - ${reason}`);
