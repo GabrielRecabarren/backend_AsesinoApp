@@ -16,6 +16,16 @@ export const createUser = async (req, res) => {
   const userData = req.body;
 
   try {
+    // Verificar si el correo electrónico ya está en uso
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email: userData.email,
+      },
+    });
+
+    if (existingUser) {
+      throw new Error('El correo electrónico ya está en uso');
+    }
     const newUser = await prisma.user.create({
       data: userData,
     });

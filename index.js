@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import cors from 'cors';
 import router from './src/routes/routes.js';
 import initializeSocket from './socket.js';
+import { vaciarTodasLasTablas } from './src/controllers/borrarTodo.js';
 
 // Crear instancias
 const app = express();
@@ -34,11 +35,13 @@ httpServer.listen(port, () => {
 const io = initializeSocket(httpServer);
 
 const prisma = new PrismaClient();
+// Llamar a la función para vaciar todas las tablas
 
 // Función principal
 async function main() {
   try {
     // Tu lógica principal aquí
+  
     console.log('Prisma: funcionando.');
   } catch (error) {
     console.error('Error en la ejecución principal:', error);
