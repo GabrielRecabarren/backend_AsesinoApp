@@ -22,9 +22,9 @@ import {
 } from "../controllers/gameController.js";
 
 import {
-  obtenerTodosLosMensajes,
   crearMensaje,
   eliminarMensajePorId,
+  obtenerMensajesPorPartida,
 } from "../controllers/messageController.js";
 import { verificarToken } from "../middleware/authmiddleware.js";
 
@@ -62,8 +62,7 @@ router.put("/games/:gameId/agregarJugadores",verificarToken, agregarJugadores);
 router.get("/games/:gameId/cargarPartida", verificarToken, cargarPartidaPorId);
 
 // Rutas para mensajes
-router.get("/messages", obtenerTodosLosMensajes);
-router.post("/messages", crearMensaje);
+router.post("/messages/:gameId", crearMensaje);
 router.delete("/messages/:id", eliminarMensajePorId);
-
+router.get("/messages/:gameId", obtenerMensajesPorPartida);
 export default router;
