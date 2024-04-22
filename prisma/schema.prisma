@@ -24,7 +24,6 @@ model User {
   gamesWonAsJournalist Int       @default(0)
   gamesWonAsManiac     Int       @default(0)
   gamesWonAsVictim     Int       @default(0)
-  messages             Message[] @relation("sender")
   players              Game[]    @relation("players")
   createdGames         Game[]    @relation("creator")
   roles                UserRoleInGame[]  // Relación con los roles del usuario en las partidas
@@ -60,15 +59,16 @@ enum UserRole {
   COMPLICE
 
 }
-
 model Message {
-  id           Int      @id @default(autoincrement())
-  content      String
-  createdAt    DateTime @default(now())
-  sender       User     @relation("sender", fields: [senderId], references: [id])
-  senderId     Int
-  game         Game     @relation("game", fields: [gameId], references: [id])
-  gameId       Int
-  role         String
-  isAccusation Boolean  @default(false)
+  id              Int       @id @default(autoincrement())
+  text         String
+  createdAt       DateTime  @default(now())
+  sender          String    // Cambiado de User a String para almacenar el nombre de usuario
+  userId        Int       // ID del remitente
+  game            Game      @relation("game", fields: [gameId], references: [id])
+  gameId          Int
+  role            String
+  isReceiver      Boolean   @default(false)
+  speakingAsRole  Boolean
 }
+

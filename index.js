@@ -41,7 +41,6 @@ const prisma = new PrismaClient();
 async function main() {
   try {
     // Tu lógica principal aquí
-  
     console.log('Prisma: funcionando.');
   } catch (error) {
     console.error('Error en la ejecución principal:', error);

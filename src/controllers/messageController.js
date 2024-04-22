@@ -21,22 +21,27 @@ const obtenerMensajesPorPartida = async (req, res) => {
 
 // Crear un nuevo mensaje en una partida específica
 const crearMensaje = async (req, res) => {
-  const { texto, userId, gameId, role } = req.body;
-  console.log(texto, userId,gameId, role);
+  const { text, sender, isReceiver, speakingAsRole, userId, gameId, role } = req.body;
+  console.log(text, userId,gameId, role,req.body,"todo");
   
   try {
     // Validar datos
-    if (!texto || !userId || !gameId) {
+    if (!text || !userId || !gameId) {
       return res.status(400).json({ error: 'Faltan datos obligatorios para crear el mensaje' });
     }
 
    // Crear el mensaje con el campo `content`
    const nuevoMensaje = await prisma.message.create({
     data: {
-      content: texto, // Aquí se utiliza `texto` para el campo `content`
-      senderId: userId,
+      text, 
+      userId,
       gameId,
-      role
+      role,
+      sender,
+      isReceiver,
+      speakingAsRole
+
+      
     },
   });
 
