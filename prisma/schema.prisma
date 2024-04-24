@@ -50,7 +50,7 @@ model UserRoleInGame {
 
 enum UserRole {
   DEFAULT
-  DOCTOR
+  MEDICO
   ASESINO
   FISCAL
   DETECTIVE

@@ -4,7 +4,7 @@ import { Server } from "socket.io";
 
 const gameRooms = {};
 const canalesPersonales = {};
-const canalesPrivados ={};
+const canalesPrivados = {};
 
 export default function initializeSocket(httpServer) {
   const io = new Server(httpServer, {
@@ -59,29 +59,33 @@ export default function initializeSocket(httpServer) {
     });
 
     //Manejando evento de rol
-    socket.on("action-rol", (accion, emisor, destinatario,gameId, callback) => {
+    socket.on("action-rol", (actionData, callback) => {
+      console.log(actionData);
+      const { emisor, destinatario, gameId, userRol } = actionData;
       //Canal usuarioElegido
       const canalUsuarioElegido = `canal_${gameId}_${destinatario}`
-      switch (accion) {
-        case "asesinar":
-          io.to(canalUsuarioElegido).emit("action-rol", accion,emisor, destinatario, gameId);
-          break;
-        default:
-          console.error("Accion desconocida");
+      if (actionData) {
+
+        io.to(canalUsuarioElegido).emit("action-rol", actionData);
+      }
+      else {
+
+        console.error("Accion desconocida");
       }
       callback("Mensaje recibido correctamente en el servidor");
     });
 
-    socket.on("confirmar-muerte", (y_n, destinatario, gameId, callback) => {
+    //Si el destinatario confirma la accion, llega este mensaje
+    socket.on("confirmar-muerte", (destinatario, gameId, callback) => {
+      //Le notificamos al canal personal
       const canalUsuarioElegido = `canal_${gameId}_${destinatario}`
-      if(y_n === true){
         console.log(canalUsuarioElegido, "canal")
         io.to(canalUsuarioElegido).emit("asesinato");
         callback("Muerte confirmada");
-      }
+      
     });
 
-    
+
 
     socket.on("disconnect", (reason) => {
       console.log(`[${socket.id}] socket disconnected - ${reason}`);
