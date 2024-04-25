@@ -61,7 +61,7 @@ export default function initializeSocket(httpServer) {
     //Manejando evento de rol
     socket.on("action-rol", (actionData, callback) => {
       console.log(actionData);
-      const { emisor, destinatario, gameId, userRol } = actionData;
+      const { destinatario, gameId } = actionData;
       //Canal usuarioElegido
       const canalUsuarioElegido = `canal_${gameId}_${destinatario}`
       if (actionData) {
@@ -76,12 +76,13 @@ export default function initializeSocket(httpServer) {
     });
 
     //Si el destinatario confirma la accion, llega este mensaje
-    socket.on("confirmar-muerte", (destinatario, gameId, callback) => {
+    socket.on("confirmar-accion", (actionData, callback) => {
       //Le notificamos al canal personal
+      const { destinatario, gameId, userRol } = actionData;
+      //Canal usuarioElegido
       const canalUsuarioElegido = `canal_${gameId}_${destinatario}`
-        console.log(canalUsuarioElegido, "canal")
-        io.to(canalUsuarioElegido).emit("asesinato");
-        callback("Muerte confirmada");
+        io.to(canalUsuarioElegido).emit(`${userRol}-exitoso`);
+        callback("Acción confirmada");
       
     });
 
