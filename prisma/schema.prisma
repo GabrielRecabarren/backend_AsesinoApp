@@ -46,6 +46,7 @@ model UserRoleInGame {
   game      Game     @relation(fields: [gameId], references: [id])
   gameId    Int
   role      UserRole
+  isAlive   Boolean  @default(true)
 }
 
 enum UserRole {

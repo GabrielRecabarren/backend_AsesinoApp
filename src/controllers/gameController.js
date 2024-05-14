@@ -294,6 +294,7 @@ export const assignUserRoleInGame = async (req, res) => {
     return res.status(500).json({ error: "Error al asignar UserRole" });
   }
 };
+// Consultar el rol de un usuario en una partida
 export const consultarRolUsuarioEnPartida = async (req, res) => {
   const { userId, gameId } = req.params;
   try {
@@ -310,10 +311,15 @@ export const consultarRolUsuarioEnPartida = async (req, res) => {
         .status(404)
         .json({ message: "No se encontró el rol del usuario en la partida." });
     }
+    console.log("check1");
 
     // Obtener el nombre del rol del usuario
     const userRole = userRoleInGame.role;
-    return res.status(200).json({ userRole });
+
+    //Obtener el estado del usuario
+    const userState  = userRoleInGame.isAlive;
+    console.log( userRole, userState , "aquisss")
+    return res.status(200).json({ userRole, userState });
   } catch (error) {
     console.error(
       "Error al consultar el rol del usuario en la partida:",
@@ -322,3 +328,77 @@ export const consultarRolUsuarioEnPartida = async (req, res) => {
     return res.status(500).json({ message: "Error interno del servidor." });
   }
 };
+
+// Controlador para cambiar el estado de vida/muerte de un usuario en una partida
+export const cambiarEstadoVidaMuerte = async (req, res) => {
+  try {
+    // Obtiene los datos del cuerpo de la solicitud
+    const { gameId, userId, nuevoEstado } = req.body;
+
+    // Asegúrate de que gameId y userId sean números válidos
+    if (!gameId || isNaN(parseInt(gameId)) || !userId || isNaN(parseInt(userId))) {
+      return res.status(400).json({ error: "gameId o userId no válido." });
+    }
+
+    // Asegúrate de que el nuevo estado sea un booleano válido
+    if (typeof nuevoEstado !== 'boolean') {
+      return res.status(400).json({ error: "El nuevo estado debe ser un booleano." });
+    }
+
+    console.log(`Cambiando el estado de vida/muerte del usuario ${userId} en la partida ${gameId}`);
+
+    // Actualiza el estado de vida/muerte del usuario en la partida
+    const usuarioActualizado = await prisma.userRoleInGame.update({
+      where: { gameId_userId: { gameId: parseInt(gameId), userId: parseInt(userId) } },
+      data: {
+        isAlive: nuevoEstado,
+      },
+    });
+
+    // Devuelve el usuario actualizado
+    return res.status(200).json(usuarioActualizado);
+  } catch (error) {
+    console.error("Error al cambiar el estado de vida/muerte del usuario en la partida:", error.message);
+    return res.status(500).json({
+      error: "No se pudo cambiar el estado de vida/muerte del usuario en la partida.",
+    });
+  }
+};
+
+// Controlador para consultar si un usuario está vivo en una partida
+export const consultarEstadoVidaMuerte = async (req, res) => {
+  try {
+    // Obtiene los datos del cuerpo de la solicitud
+    const { gameId, userId } = req.params;
+
+    // Asegúrate de que gameId y userId sean números válidos
+    if (!gameId || isNaN(parseInt(gameId)) || !userId || isNaN(parseInt(userId))) {
+      return res.status(400).json({ error: "gameId o userId no válido." });
+    }
+
+    console.log(`Consultando estado de vida/muerte del usuario ${userId} en la partida ${gameId}`);
+
+    // Consulta el estado de vida/muerte del usuario en la partida correspondiente
+    const userRoleInGame = await prisma.userRoleInGame.findFirst({
+      where: {
+        userId: parseInt(userId),
+        gameId: parseInt(gameId),
+      },
+      select: {
+        isAlive: true,
+      },
+    });
+
+    // Si el usuario no está en la partida o no se encuentra el estado de vida/muerte, devuelve un error
+    if (!userRoleInGame) {
+      return res.status(404).json({ error: "Usuario no encontrado en la partida." });
+    }
+
+    // Devuelve el estado de vida/muerte del usuario en la partida
+    return res.status(200).json({ estaVivo: userRoleInGame.isAlive });
+  } catch (error) {
+    console.error("Error al consultar el estado de vida/muerte del usuario en la partida:", error.message);
+    return res.status(500).json({ error: "No se pudo consultar el estado de vida/muerte del usuario en la partida." });
+  }
+};
+

@@ -4,7 +4,6 @@ import { Server } from "socket.io";
 
 const gameRooms = {};
 const canalesPersonales = {};
-const canalesPrivados = {};
 
 export default function initializeSocket(httpServer) {
   const io = new Server(httpServer, {
@@ -42,7 +41,7 @@ export default function initializeSocket(httpServer) {
     });
 
     // Manejar el evento de chat message
-    socket.on("chat-message", (msg, gameId, callback) => {
+    socket.on("chat-message", (msg, callback) => {
       if (selectedRoom) {
         io.to(selectedRoom).emit("chat-message", msg, () => {
           // Enviar una respuesta al callback del cliente

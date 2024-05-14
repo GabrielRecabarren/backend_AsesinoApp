@@ -6,7 +6,6 @@ import {
   updateUser,
   deleteUser,
   loginUser,
-  changeUserRole,
 } from "../controllers/userController.js";
 
 import {
@@ -18,7 +17,8 @@ import {
   listarPartidasPorId,
   cargarPartidaPorId,
   assignUserRoleInGame,
-  consultarRolUsuarioEnPartida
+  consultarRolUsuarioEnPartida,
+  cambiarEstadoVidaMuerte
 } from "../controllers/gameController.js";
 
 import {
@@ -55,6 +55,9 @@ router.get("/games/:userId", verificarToken, listarPartidasPorId);
 //Eleccion y consulta de rol
 router.put('/users/:userId/games/:gameId/assign-role/:userRoleId', verificarToken, assignUserRoleInGame);
 router.get('/users/:userId/games/:gameId/user-role', verificarToken, consultarRolUsuarioEnPartida);
+
+//Cambiar estado a asesinado
+router.put("/games/:gameId/asesinado/:userId", verificarToken, cambiarEstadoVidaMuerte);
 
 //Agregar jugadores
 router.put("/games/:gameId/agregarJugadores",verificarToken, agregarJugadores);
