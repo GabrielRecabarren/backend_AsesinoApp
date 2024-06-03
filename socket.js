@@ -74,17 +74,51 @@ export default function initializeSocket(httpServer) {
       callback("Mensaje recibido correctamente en el servidor");
     });
 
+
+
     //Si el destinatario confirma la accion, llega este mensaje
     socket.on("confirmar-accion", (actionData, callback) => {
       //Le notificamos al canal personal
       const { destinatario, gameId, userRol } = actionData;
       //Canal usuarioElegido
       const canalUsuarioElegido = `canal_${gameId}_${destinatario}`
-        io.to(canalUsuarioElegido).emit(`${userRol}-exitoso`);
-        callback("Acción confirmada");
-      
+      io.to(canalUsuarioElegido).emit(`${userRol}-exitoso`);
+      callback("Acción confirmada");
+
     });
 
+    // Manejar evento de increpar
+    socket.on("increpar", (increparData, callback) => {
+      try {
+        const { selectedPlayer, gameId } = increparData;
+        console.log(increparData, "Increpar Data Recibida en servidor");
+
+        // Verificar si increparData tiene los datos necesarios
+        if (!selectedPlayer || !gameId) {
+          throw new Error("Datos incompletos para increpar");
+        }
+
+        // Notificamos al increpado
+        const canalUsuarioElegido = `canal_${gameId}_${selectedPlayer.id}`;
+
+        io.to(canalUsuarioElegido).emit("increpar", increparData);
+
+        callback("Increpar recibido correctamente en el servidor");
+      } catch (error) {
+        console.error("Error en el evento increpar:", error.message);
+        // Si el callback está definido, devolver el error al cliente
+        if (typeof callback === 'function') {
+          callback(`Error: ${error.message}`);
+        }
+      }
+    });
+
+    socket.on('increpar-confirmado', (increparData) =>{
+      console.log("increparconfirmado", increparData);
+      const { gameId, userId } = increparData;
+      const canalUsuarioElegido = `canal_${gameId}_${userId}`
+      io.to(canalUsuarioElegido).emit(`increpado`);
+    })
 
 
     socket.on("disconnect", (reason) => {
