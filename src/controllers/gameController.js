@@ -8,7 +8,7 @@ export const crearPartida = async (req, res) => {
     // Obtiene los datos del cuerpo de la solicitud
     const { userId, datosPartida } = req.body;
 
-    console.log(`Validación datos: ${userId}, ${datosPartida.state} `);
+    console.log(`Validación datos: ${userId}, ${datosPartida.state}, ${datosPartida.name} `);
 
     // Validación de datos
     if (!userId || typeof userId !== "number") {
@@ -27,12 +27,14 @@ export const crearPartida = async (req, res) => {
     const nuevaPartida = await prisma.game.create({
       data: {
         state: datosPartida.state,
+        name: datosPartida.name,
         players: {
           connect: { id: userId }, // Conecta al creador con la partida
         },
         creator: {
           connect: { id: userId }, // Crea un nuevo usuario como creador de la partida
         },
+      
       },
     });
 
