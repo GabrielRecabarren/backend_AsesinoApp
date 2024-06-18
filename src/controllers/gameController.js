@@ -29,12 +29,29 @@ export const crearPartida = async (req, res) => {
         state: datosPartida.state,
         name: datosPartida.name,
         players: {
-          connect: { id: userId }, // Conecta al creador con la partida
+          connect: [
+            { id: userId },
+            { id: 0 },
+          ],
         },
         creator: {
           connect: { id: userId }, // Crea un nuevo usuario como creador de la partida
         },
-      
+        roles: {
+          create: [
+            {
+              user: { connect: { id: userId } },
+              role: 'DEFAULT', // Ajusta el rol según sea necesario
+              isAlive: true
+            },
+            {
+              user: { connect: { id: 0 } },
+              role: 'DEFAULT', // Ajusta el rol según sea necesario
+              isAlive: true
+            },
+          ],
+        },
+
       },
     });
 
@@ -319,8 +336,8 @@ export const consultarRolUsuarioEnPartida = async (req, res) => {
     const userRole = userRoleInGame.role;
 
     //Obtener el estado del usuario
-    const userState  = userRoleInGame.isAlive;
-    console.log( userRole, userState , "aquisss")
+    const userState = userRoleInGame.isAlive;
+    console.log(userRole, userState, "aquisss")
     return res.status(200).json({ userRole, userState });
   } catch (error) {
     console.error(
@@ -331,44 +348,11 @@ export const consultarRolUsuarioEnPartida = async (req, res) => {
   }
 };
 
-// Controlador para cambiar el estado de vida/muerte de un usuario en una partida
-export const cambiarEstadoVidaMuerte = async (req, res) => {
-  try {
-    // Obtiene los datos del cuerpo de la solicitud
-    const { gameId, userId, nuevoEstado } = req.body;
 
-    // Asegúrate de que gameId y userId sean números válidos
-    if (!gameId || isNaN(parseInt(gameId)) || !userId || isNaN(parseInt(userId))) {
-      return res.status(400).json({ error: "gameId o userId no válido." });
-    }
-
-    // Asegúrate de que el nuevo estado sea un booleano válido
-    if (typeof nuevoEstado !== 'boolean') {
-      return res.status(400).json({ error: "El nuevo estado debe ser un booleano." });
-    }
-
-    console.log(`Cambiando el estado de vida/muerte del usuario ${userId} en la partida ${gameId}`);
-
-    // Actualiza el estado de vida/muerte del usuario en la partida
-    const usuarioActualizado = await prisma.userRoleInGame.update({
-      where: { gameId_userId: { gameId: parseInt(gameId), userId: parseInt(userId) } },
-      data: {
-        isAlive: nuevoEstado,
-      },
-    });
-
-    // Devuelve el usuario actualizado
-    return res.status(200).json(usuarioActualizado);
-  } catch (error) {
-    console.error("Error al cambiar el estado de vida/muerte del usuario en la partida:", error.message);
-    return res.status(500).json({
-      error: "No se pudo cambiar el estado de vida/muerte del usuario en la partida.",
-    });
-  }
-};
 
 // Controlador para consultar si un usuario está vivo en una partida
 export const consultarEstadoVidaMuerte = async (req, res) => {
+  console.log("ConsultaEstaddo en El bACK")
   try {
     // Obtiene los datos del cuerpo de la solicitud
     const { gameId, userId } = req.params;
@@ -401,6 +385,39 @@ export const consultarEstadoVidaMuerte = async (req, res) => {
   } catch (error) {
     console.error("Error al consultar el estado de vida/muerte del usuario en la partida:", error.message);
     return res.status(500).json({ error: "No se pudo consultar el estado de vida/muerte del usuario en la partida." });
+  }
+};
+
+//Actualizar Estado del Jugador
+export const actualizarEstadoJugador = async (req, res) => {
+  try {
+    const { userId, gameId, isAlive } = req.body;
+    console.log(`actualizar estado del jugador ${userId} en la partida ${gameId}`)
+    
+    // Validación de datos
+    if (!userId || typeof userId !== "number" || !gameId || typeof gameId !== "number") {
+      return res.status(400).json({ error: "Datos no válidos." });
+    }
+
+    // Actualiza el estado del jugador en la partida
+    const updatedRole = await prisma.userRoleInGame.updateMany({
+      where: {
+        userId: userId,
+        gameId: gameId,
+      },
+      data: {
+        isAlive: isAlive,
+      },
+    });
+
+    if (updatedRole.count === 0) {
+      return res.status(404).json({ error: "Usuario o partida no encontrados." });
+    }
+
+    return res.status(200).json({ message: "Estado del jugador actualizado." });
+  } catch (error) {
+    console.error("Error al actualizar el estado del jugador:", error.message);
+    return res.status(500).json({ error: "No se pudo actualizar el estado del jugador." });
   }
 };
 

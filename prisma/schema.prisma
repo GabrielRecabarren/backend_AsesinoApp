@@ -59,6 +59,7 @@ enum UserRole {
   MANIACO
   PERIODISTA
   COMPLICE
+  VICTIMA
   REPORTE
 }
 model Message {

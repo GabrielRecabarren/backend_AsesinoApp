@@ -18,7 +18,8 @@ import {
   cargarPartidaPorId,
   assignUserRoleInGame,
   consultarRolUsuarioEnPartida,
-  cambiarEstadoVidaMuerte
+  consultarEstadoVidaMuerte,
+  actualizarEstadoJugador
 } from "../controllers/gameController.js";
 
 import {
@@ -57,7 +58,9 @@ router.put('/users/:userId/games/:gameId/assign-role/:userRoleId', verificarToke
 router.get('/users/:userId/games/:gameId/user-role', verificarToken, consultarRolUsuarioEnPartida);
 
 //Cambiar estado a asesinado
-router.put("/games/:gameId/asesinado/:userId", verificarToken, cambiarEstadoVidaMuerte);
+router.put("/games/:gameId/asesinado/:userId", verificarToken, actualizarEstadoJugador);
+//Consultar estado jugador
+router.get("/games/:gameId/estado/:userId", verificarToken, consultarEstadoVidaMuerte);
 
 //Agregar jugadores
 router.put("/games/:gameId/agregarJugadores",verificarToken, agregarJugadores);

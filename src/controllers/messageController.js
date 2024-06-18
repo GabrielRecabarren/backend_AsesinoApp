@@ -26,11 +26,10 @@ const crearMensaje = async (req, res) => {
   
   try {
     // Validar datos
-    if (!text || !userId || !gameId) {
+    if (!text || !gameId) {
       return res.status(400).json({ error: 'Faltan datos obligatorios para crear el mensaje' });
     }
-
-   // Crear el mensaje con el campo `content`
+console.log("LLEGA AQUI?");
    const nuevoMensaje = await prisma.message.create({
     data: {
       text, 
