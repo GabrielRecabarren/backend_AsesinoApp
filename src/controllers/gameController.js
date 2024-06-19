@@ -263,13 +263,11 @@ export const cargarPartidaPorId = async (req, res) => {
     return res.status(500).json({ error: "Error al cargar la partida" });
   }
 };
-
 export const assignUserRoleInGame = async (req, res) => {
   const { userId, gameId, userRoleId } = req.params;
 
   try {
     // Verificar si el usuario y la partida existen
-    // console.log(userId, gameId, userRoleId, "datos assign roles");
     const user = await prisma.user.findUnique({
       where: { id: parseInt(userId) },
     });
@@ -288,9 +286,38 @@ export const assignUserRoleInGame = async (req, res) => {
     if (!Object.values(UserRole).includes(userRoleId)) {
       return res.status(400).json({ message: "UserRole no válido" });
     }
-    console.log("validaciones ok");
 
-    // Crear un nuevo registro UserRoleInGame
+    console.log("Validaciones ok");
+
+    // Verificar si ya existe un registro con el userId y gameId
+    const existingUserRoleInGame = await prisma.userRoleInGame.findUnique({
+      where: {
+        userId_gameId: {
+          userId: parseInt(userId),
+          gameId: parseInt(gameId),
+        },
+      },
+    });
+
+    if (existingUserRoleInGame) {
+      // Actualizar el registro existente con el nuevo rol
+      await prisma.userRoleInGame.update({
+        where: {
+          id: existingUserRoleInGame.id,
+        },
+        data: {
+          role: userRoleId,
+        },
+      });
+
+      return res
+        .status(200)
+        .json({
+          message: `El rol del Usuario ${userId} en la partida ${gameId} ha sido actualizado a ${userRoleId}.`,
+        });
+    }
+
+    // Crear un nuevo registro UserRoleInGame si no existe
     await prisma.userRoleInGame.create({
       data: {
         user: { connect: { id: parseInt(userId) } },
@@ -313,6 +340,9 @@ export const assignUserRoleInGame = async (req, res) => {
     return res.status(500).json({ error: "Error al asignar UserRole" });
   }
 };
+
+
+
 // Consultar el rol de un usuario en una partida
 export const consultarRolUsuarioEnPartida = async (req, res) => {
   const { userId, gameId } = req.params;

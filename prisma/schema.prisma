@@ -48,7 +48,11 @@ model UserRoleInGame {
   gameId    Int
   role      UserRole
   isAlive   Boolean  @default(true)
+  @@unique([userId, gameId])
+
 }
+
+
 
 enum UserRole {
   DEFAULT
