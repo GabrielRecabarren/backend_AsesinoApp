@@ -62,7 +62,6 @@ export const crearPartida = async (req, res) => {
     return res.status(500).json({ error: "No se pudo crear la partida." });
   }
 };
-
 // Controlador para agregar jugadores a una partida existente
 export const agregarJugadores = async (req, res) => {
   try {
@@ -81,7 +80,6 @@ export const agregarJugadores = async (req, res) => {
     // Asegúrate de que los userIds sean un array válido
     if (!userIds) {
       console.log("no hay users id o no es valido");
-
       return res
         .status(400)
         .json({ error: "userIds debe ser un array válido de números." });
@@ -109,7 +107,7 @@ export const agregarJugadores = async (req, res) => {
 
     // Conecta los nuevos jugadores a la partida dentro de una transacción
     const partidaActualizada = await prisma.$transaction(async (prisma) => {
-      return prisma.game.update({
+      const updatedGame = await prisma.game.update({
         where: { id: parseInt(gameId) },
         data: {
           players: {
@@ -124,6 +122,21 @@ export const agregarJugadores = async (req, res) => {
           },
         },
       });
+
+      // Asignar rol "DEFAULT" a los nuevos jugadores
+      await Promise.all(
+        nuevosUserIds.map((userId) =>
+          prisma.userRoleInGame.create({
+            data: {
+              userId: userId,
+              gameId: parseInt(gameId),
+              role: 'DEFAULT',
+            },
+          })
+        )
+      );
+
+      return updatedGame;
     });
 
     // Devuelve la partida actualizada
@@ -136,6 +149,7 @@ export const agregarJugadores = async (req, res) => {
     });
   }
 };
+
 
 //Acceder a los jugadores de un juego
 export const listarJugadores = async (req, res) => {
