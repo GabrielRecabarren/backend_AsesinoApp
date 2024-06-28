@@ -25,10 +25,10 @@ app.use((req, res, next) => {
 });
 app.use(router);
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 // Iniciar servidor HTTP
-httpServer.listen(port, () => {
-  console.log(`Servidor HTTP en puerto ${port}`);
+httpServer.listen(port,"0.0.0.0",() => {
+  console.log(`Servidor HTTP en puerto ${port}`, 'Hola');
 });
 
 // Inicializar Socket.IO
