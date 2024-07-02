@@ -432,22 +432,28 @@ export const consultarEstadoVidaMuerte = async (req, res) => {
   }
 };
 
-//Actualizar Estado del Jugador
+// Actualizar Estado del Jugador
 export const actualizarEstadoJugador = async (req, res) => {
   try {
-    const { userId, gameId, isAlive } = req.body;
-    console.log(`actualizar estado del jugador ${userId} en la partida ${gameId}`)
-    
+    const { userId, gameId } = req.params;
+    const { isAlive } = req.body;
+
+    console.log(`actualizar estado del jugador ${userId} en la partida ${gameId}. Está vivo? ${isAlive}`);
+
     // Validación de datos
-    if (!userId || typeof userId !== "number" || !gameId || typeof gameId !== "number") {
+    if (!userId || isNaN(parseInt(userId)) || !gameId || isNaN(parseInt(gameId))) {
       return res.status(400).json({ error: "Datos no válidos." });
     }
 
+     // Validar isAlive
+     if (typeof isAlive !== 'boolean') {
+      return res.status(400).json({ error: "isAlive debe ser un valor booleano." });
+    }
     // Actualiza el estado del jugador en la partida
     const updatedRole = await prisma.userRoleInGame.updateMany({
       where: {
-        userId: userId,
-        gameId: gameId,
+        userId: parseInt(userId),
+        gameId: parseInt(gameId),
       },
       data: {
         isAlive: isAlive,
@@ -458,10 +464,11 @@ export const actualizarEstadoJugador = async (req, res) => {
       return res.status(404).json({ error: "Usuario o partida no encontrados." });
     }
 
-    return res.status(200).json({ message: "Estado del jugador actualizado." });
+    return res.status(200).json({ message: "Estado del jugador actualizado.", role: updatedRole });
   } catch (error) {
     console.error("Error al actualizar el estado del jugador:", error.message);
     return res.status(500).json({ error: "No se pudo actualizar el estado del jugador." });
   }
 };
+
 
